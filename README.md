@@ -16,8 +16,8 @@ To run this project locally:
    ```bash
    git clone https://github.com/rubybegoniaag/Arabian_Perf_Halter_2up.git
 2. Navigate to the project directory:
-
 cd Arabian_Perf_Halter_2up
+
 3. Open the index.html file in your web browser.
 
 Usage
