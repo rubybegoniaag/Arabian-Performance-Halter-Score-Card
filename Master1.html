@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Halter Master Score Sheet</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .tiebreaker-table {
+            width: auto;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .disabled {
+            background-color: #e0e0e0;
+            pointer-events: none;
+        }
+        .grey-out {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Performance Halter Master Score Sheet</h1>
+    <form id="scoreSheetForm">
+        <p>Class #: <input type="text" name="classNumber"> &nbsp;&nbsp;&nbsp; Class Name: <input type="text" name="className"> &nbsp;&nbsp;&nbsp; Total Entries: <input type="number" name="totalEntries" min="1" oninput="generateRows(this.value)"></p>
+        <p>Judge: <input type="text" name="judge"></p>
+        <p>Is Call Judge? 
+            <input type="radio" name="isCallJudge" value="yes" required> Yes
+            <input type="radio" name="isCallJudge" value="no" required> No
+        </p>
+        <p>Type: 
+            <input type="radio" name="horseType" value="arabian" checked onclick="toggleArabianType()"> Arabian Performance Halter
+            <input type="radio" name="horseType" value="halfArabian" onclick="toggleArabianType()"> Half-Arabian/Anglo-Arabian Performance Halter
+        </p>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>Entry#</th>
+                <th>Athletic Structure</th>
+                <th>Arabian Type (Purebred Only)</th>
+                <th>Quality Balance Substance @ Walk</th>
+                <th>Neck Shoulder</th>
+                <th>Back Loin Hip</th>
+                <th>Legs Feet</th>
+                <th>Movement</th>
+                <th>Penalties</th>
+                <th>Total Score</th>
+                <th>Placing</th>
+            </tr>
+        </thead>
+        <tbody id="scoreRows">
+            <!-- Rows will be generated dynamically -->
+        </tbody>
+    </table>
+
+    <button onclick="calculatePlacings()">Calculate Placings</button>
+
+    <h2>Tiebreakers</h2>
+    <table class="tiebreaker-table">
+        <thead>
+            <tr>
+                <th>Arabian Performance Halter</th>
+                <th>Half-Arabian/Anglo-Arabian Performance Halter</th>
+                <th>Tie Entry# Winner</th>
+                <th>Tie High Score</th>
+                <th>Tie Entry# Loser</th>
+                <th>Tie Low Score</th>
+            </tr>
+        </thead>
+        <tbody id="tiebreakerRows">
+            <tr>
+                <td>Athletic Structure</td>
+                <td>Athletic Structure</td>
+                <td id="athleticStructureWinner"></td>
+                <td id="athleticStructureHighScore"></td>
+                <td id="athleticStructureLoser"></td>
+                <td id="athleticStructureLowScore"></td>
+            </tr>
+            <tr>
+                <td>Breed Type</td>
+                <td>Quality/Balance/Substance</td>
+                <td id="breedTypeWinner"></td>
+                <td id="breedTypeHighScore"></td>
+                <td id="breedTypeLoser"></td>
+                <td id="breedTypeLowScore"></td>
+            </tr>
+            <tr>
+                <td>Quality/Balance/Substance</td>
+                <td>Conformation</td>
+                <td id="qualityBalanceWinner"></td>
+                <td id="qualityBalanceHighScore"></td>
+                <td id="qualityBalanceLoser"></td>
+                <td id="qualityBalanceLowScore"></td>
+            </tr>
+            <tr>
+                <td>Conformation</td>
+                <td>Movement</td>
+                <td id="conformationWinner"></td>
+                <td id="conformationHighScore"></td>
+                <td id="conformationLoser"></td>
+                <td id="conformationLowScore"></td>
+            </tr>
+            <tr>
+                <td>Movement</td>
+                <td>Call Judge</td>
+                <td id="movementWinner"></td>
+                <td id="movementHighScore"></td>
+                <td id="movementLoser"></td>
+                <td id="movementLowScore"></td>
+            </tr>
+            <tr>
+                <td>Call Judge</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p>Scorer's Signature: ________________________</p>
+
+    <script>
+        function generateRows(totalEntries) {
+            const tbody = document.getElementById('scoreRows');
+            tbody.innerHTML = ''; // Clear existing rows
+
+            for (let i = 0; i < totalEntries; i++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="text" name="entryNumber" size="3"></td>
+                    <td><input type="number" name="athleticStructure" step="0.5" min="10" max="20" onblur="validateInput(this)" oninput="calculateScores(this)"></td>
+                    <td><input type="number" name="arabianType" step="0.5" min="10" max="20" onblur="validateInput(this)" oninput="calculateScores(this)"></td>
+                    <td><input type="number" name="qualityBalanceSubstance" step="0.5" min="10" max="20" onblur="validateInput(this)" oninput="calculateScores(this)"></td>
+                    <td><input type="number" name="neckShoulder" step="0.5" min="10" max="20" onblur="validateInput(this)" oninput="calculateScores(this)"></td>
+                    <td><input type="number" name="backLoinHip" step="0.5" min="10" max="20" onblur="validateInput(this)" oninput="calculateScores(this)"></td>
+                    <td><input type="number" name="legsFeet" step="0.5" min="10" max="20" onblur="validateInput(this)" oninput="calculateScores(this)"></td>
+                    <td><input type="number" name="movement" step="0.5" min="10" max="20" onblur="validateInput(this)" oninput="calculateScores(this)"></td>
+                    <td><input type="number" name="penalties" step="1" min="0" max="3" onblur="validatePenalty(this)" oninput="calculateScores(this)"></td>
+                    <td><input type="number" name="totalScore" readonly></td>
+                    <td><input type="text" name="placing" size="3"></td>
+                `;
+                tbody.appendChild(row);
+            }
+            toggleArabianType(); // Ensure correct field state on row generation
+        }
+
+        function calculateScores(inputElement) {
+            const row = inputElement.parentElement.parentElement;
+            const scores = row.querySelectorAll('input[type="number"]');
+            let total = 0;
+
+            scores.forEach(score => {
+                if (score.name !== 'totalScore' && score.name !== 'penalties' && score.value !== '') {
+                    total += parseFloat(score.value);
+                }
+            });
+
+            const penalties = parseFloat(row.querySelector('input[name="penalties"]').value) || 0;
+            total -= penalties; // Subtract penalties from total
+
+            const totalScoreField = row.querySelector('input[name="totalScore"]');
+            totalScoreField.value = total;
+        }
+
+        function toggleArabianType() {
+            const horseType = document.querySelector('input[name="horseType"]:checked').value;
+            const arabianTypeFields = document.querySelectorAll('input[name="arabianType"]');
+            const tiebreakerColumns = document.querySelectorAll('.tiebreaker-table tbody tr td:first-child, .tiebreaker-table tbody tr td:nth-child(2)');
+
+            arabianTypeFields.forEach(field => {
+                if (horseType === 'halfArabian') {
+                    field.classList.add('disabled');
+                    field.value = '';
+                } else {
+                    field.classList.remove('disabled');
+                }
+            });
+
+            tiebreakerColumns.forEach((column, index) => {
+                if ((horseType === 'arabian' && index % 2 === 1) || (horseType === 'halfArabian' && index % 2 === 0)) {
+                    column.classList.add('grey-out');
+                } else {
+                    column.classList.remove('grey-out');
+                }
+            });
+        }
+
+        function validateInput(inputElement) {
+            let value = parseFloat(inputElement.value);
+
+            // Check if the value is within the range and adheres to the step
+            if (value < 10 || value > 20 || (value * 10) % 5 !== 0) {
+                alert("Please enter a number between 10 and 20, in increments of 0.5.");
+                inputElement.value = ''; // Clear the invalid input
+            }
+        }
+
+        function validatePenalty(inputElement) {
+            let value = parseInt(inputElement.value);
+
+            // Check if the value is within the allowed penalties
+            if (value < 0 || value > 3) {
+                alert("Please enter a penalty between 0 and 3.");
+                inputElement.value = ''; // Clear the invalid input
+            }
+        }
+
+        function calculateConformationScore(row) {
+            const neckShoulder = parseFloat(row.querySelector('input[name="neckShoulder"]').value) || 0;
+            const backLoinHip = parseFloat(row.querySelector('input[name="backLoinHip"]').value) || 0;
+            const legsFeet = parseFloat(row.querySelector('input[name="legsFeet"]').value) || 0;
+
+            return neckShoulder + backLoinHip + legsFeet;
+        }
+
+        function calculatePlacings() {
+            const rows = Array.from(document.querySelectorAll('#scoreRows tr'));
+            const horseType = document.querySelector('input[name="horseType"]:checked').value;
+            const isCallJudge = document.querySelector('input[name="isCallJudge"]:checked').value === 'yes';
+
+            rows.sort((a, b) => {
+                const scoreA = parseFloat(a.querySelector('input[name="totalScore"]').value) || 0;
+                const scoreB = parseFloat(b.querySelector('input[name="totalScore"]').value) || 0;
+
+                if (scoreA !== scoreB) return scoreB - scoreA;
+
+                // Tiebreaker logic
+                const tiebreakers = ['athleticStructure', horseType === 'arabian' ? 'arabianType' : 'qualityBalanceSubstance', 'qualityBalanceSubstance', 'conformation', 'callJudge'];
+
+                for (const tiebreaker of tiebreakers) {
+                    let scoreA, scoreB;
+                    if (tiebreaker === 'conformation') {
+                        scoreA = calculateConformationScore(a);
+                        scoreB = calculateConformationScore(b);
+                    } else if (tiebreaker === 'callJudge' && isCallJudge) {
+                        // If Call Judge is the tiebreaker and "Is Call Judge" is YES, resolve tie
+                        return 1;
+                    } else {
+                        scoreA = parseFloat(a.querySelector(`input[name="${tiebreaker}"]`).value) || 0;
+                        scoreB = parseFloat(b.querySelector(`input[name="${tiebreaker}"]`).value) || 0;
+                    }
+
+                    if (scoreA !== scoreB) {
+                        const winner = scoreA > scoreB ? a : b;
+                        const loser = scoreA > scoreB ? b : a;
+
+                        // Populate tiebreaker results
+                        document.getElementById(`${tiebreaker}Winner`).innerText = winner.querySelector('input[name="entryNumber"]').value;
+                        document.getElementById(`${tiebreaker}HighScore`).innerText = scoreA > scoreB ? scoreA : scoreB;
+                        document.getElementById(`${tiebreaker}Loser`).innerText = loser.querySelector('input[name="entryNumber"]').value;
+                        document.getElementById(`${tiebreaker}LowScore`).innerText = scoreA > scoreB ? scoreB : scoreA;
+
+                        return scoreB - scoreA; // Resolve tie
+                    }
+                }
+
+                return 0; // If all tiebreakers are equal, maintain order
+            });
+
+            rows.forEach((row, index) => {
+                row.querySelector('input[name="placing"]').value = index + 1;
+            });
+        }
+    </script>
+</body>
+</html>
