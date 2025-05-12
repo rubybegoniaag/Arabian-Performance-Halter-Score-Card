@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Halter Score Calculator</title>
+    <style>
+        .category {
+            margin-bottom: 20px;
+        }
+        .score {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Performance Halter Score Calculator</h1>
+    <form id="scoreForm">
+        <div class="category">
+            <label>A Athletic Structure:</label><br>
+            <input type="radio" name="athleticStructure" value="10" class="score">10
+            <input type="radio" name="athleticStructure" value="11" class="score">11
+            <!-- Add more scores as needed -->
+        </div>
+        <div class="category">
+            <label>T Breed Type:</label><br>
+            <input type="radio" name="breedType" value="10" class="score">10
+            <input type="radio" name="breedType" value="11" class="score">11
+            <!-- Add more scores as needed -->
+        </div>
+        <!-- Repeat for other categories -->
+        <div class="category">
+            <label>Penalties:</label><br>
+            <input type="checkbox" name="penalty" value="-1" class="penalty">-1
+            <input type="checkbox" name="penalty" value="-2" class="penalty">-2
+            <!-- Add more penalties as needed -->
+        </div>
+        <button type="button" onclick="calculateTotal()">Calculate Total Score</button>
+    </form>
+    <h2>Total Score: <span id="totalScore">0</span></h2>
+
+    <script>
+        function calculateTotal() {
+            let totalScore = 0;
+            const scores = document.querySelectorAll('.score:checked');
+            scores.forEach(score => {
+                totalScore += parseFloat(score.value);
+            });
+
+            const penalties = document.querySelectorAll('.penalty:checked');
+            penalties.forEach(penalty => {
+                totalScore += parseFloat(penalty.value);
+            });
+
+            document.getElementById('totalScore').innerText = totalScore;
+        }
+    </script>
+</body>
+</html>
